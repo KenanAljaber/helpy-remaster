@@ -95,8 +95,11 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(onPressed: (){
               //go to home
               Navigator.pushNamed(context, RoutesConstants.login);
-            }, child: Text("test"))
-            ,
+            }, child: Text("login")),
+            TextButton(onPressed: (){
+              //go to home
+              Navigator.pushNamed(context, RoutesConstants.map);
+            }, child: Text("map")),
             const Text(
               'You have pushed the button this many times:',
             ),

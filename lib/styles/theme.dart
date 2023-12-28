@@ -13,6 +13,56 @@ class AppColors {
 class AppTheme {
   static final defaultTheme = ThemeData(
       useMaterial3: true,
+      fontFamily:'Dubai' ,
+      primaryTextTheme: const TextTheme(
+        titleLarge: TextStyle(
+          color: AppColors.primaryColor,
+        ),
+        titleMedium: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        titleSmall: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        bodyLarge: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        bodyMedium: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        bodySmall: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        labelLarge: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        labelMedium: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        labelSmall: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        displayLarge: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        displayMedium: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        displaySmall: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        headlineLarge: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        headlineMedium: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        headlineSmall: TextStyle(
+          color: AppColors.thirdColor,
+        ),
+        
+      ),
+
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryColor,
       ),
@@ -27,9 +77,10 @@ class AppTheme {
           ),
         ),
       ),
+      
       inputDecorationTheme: InputDecorationTheme(
         //center the text
-
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0.0),
         filled: true,
         fillColor: AppColors.white,
         border: InputBorder.none,

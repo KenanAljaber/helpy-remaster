@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: UtilityMethods.getScreenSize(context).width * 0.6,
                 height: 50,
                 child: TextField(
-                  style: TextStyle(color: AppColors.primaryColor, fontSize: 18),
+                  style: TextStyle(color: AppColors.thirdColor, fontSize: 18),
                   maxLines: 1,
 
                   // expands: true,
@@ -100,8 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 50,
                 width: UtilityMethods.getScreenSize(context).width * 0.6,
                 child: const TextField(
-                  style: TextStyle(color: AppColors.primaryColor, fontSize: 18),
                   obscureText: true,
+                  style: TextStyle(color: AppColors.thirdColor, fontSize: 18),
                   decoration: InputDecoration(
                     // labelText: 'Email',
                     contentPadding: EdgeInsets.all(8),
