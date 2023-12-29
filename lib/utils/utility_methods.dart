@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,19 @@ import 'package:permission_handler/permission_handler.dart';
 class UtilityMethods {
   static Size getScreenSize(BuildContext context) {
     return MediaQuery.of(context).size;
+  }
+
+  static bool isMobile (BuildContext context) {
+    try {
+    if(UtilityMethods.getScreenSize(context).width < 600) {
+      return true;
+     }
+     return false;
+    
+    } catch (e) {
+      print("an error occured");
+      return false;
+    }
   }
 
   static void hideStatusBar() {

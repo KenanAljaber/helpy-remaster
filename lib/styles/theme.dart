@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primaryColor = Color(0xFFFEA202);
-  static const secondaryColor = Color(0xFFFF6E4E);
+  static const primaryColor = Color.fromARGB(255, 254, 161, 1);
+  static const secondaryColor = Color.fromARGB(255, 255, 110, 78);
   // #87643E
-  static const thirdColor = Color(0xFF87643E);
+  static const thirdColor = Color(0xFF87643e);
   static const white = Colors.white;
 }
 
@@ -86,11 +86,11 @@ class AppTheme {
         border: InputBorder.none,
         alignLabelWithHint: true,
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(10.0),
           borderSide: const BorderSide(color: Colors.transparent, width: 2.0),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(10.0),
           borderSide: const BorderSide(color: Colors.transparent),
         ),
         labelStyle: const TextStyle(
@@ -108,4 +108,11 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryColor,
       ));
+
+  static const loginBackgroundGradient = LinearGradient(
+          colors: [Color(0xFFCDC9CF),Color(0xFFD5B29F), Color(0xFFEBA073)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          tileMode: TileMode.clamp
+         );
 }
