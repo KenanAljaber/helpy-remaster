@@ -16,11 +16,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       initialRoute: "/",
-      routes: AppRoutes.getAppRoutes(),
+      onGenerateRoute: AppRoutes.getAppRoutes,
       theme: AppTheme.defaultTheme,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
+
+
 }
 
 class MyHomePage extends StatefulWidget {
@@ -95,11 +97,11 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(onPressed: (){
               //go to home
               Navigator.pushNamed(context, RoutesConstants.login);
-            }, child: Text("login")),
+            }, child: const Text("login")),
             TextButton(onPressed: (){
               //go to home
               Navigator.pushNamed(context, RoutesConstants.map);
-            }, child: Text("map")),
+            }, child: const Text("map")),
             const Text(
               'You have pushed the button this many times:',
             ),

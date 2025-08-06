@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 class AppColors {
   static const primaryColor = Color.fromARGB(255, 254, 161, 1);
   static const secondaryColor = Color.fromARGB(255, 255, 110, 78);
-  // #87643E
+  
   static const thirdColor = Color(0xFF87643e);
+  static const almostBlack = Color(0xFF333333);
   static const white = Colors.white;
 }
 
@@ -68,9 +69,9 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(AppColors.white),
-          backgroundColor: MaterialStateProperty.all(AppColors.secondaryColor),
-          shape: MaterialStateProperty.all(
+          foregroundColor: WidgetStateProperty.all(AppColors.white),
+          backgroundColor: WidgetStateProperty.all(AppColors.secondaryColor),
+          shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0.0),
             ),

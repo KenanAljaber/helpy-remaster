@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     double headerHeight= isMobile? 50 : 60;
     double headerFontSize=    isMobile ? 35 : 50;
     double textFieldWidth= isMobile ? 180 : 250;
-    Offset headerTextOffset = isMobile ? Offset(0, 0) : Offset(0, -5);
+    Offset headerTextOffset = isMobile ? const Offset(0, 0) : const Offset(0, -5);
 
     return Scaffold(
       // appBar: AppBar(),
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: AppColors.white,
                                   fontSize: headerFontSize,
                                   fontWeight: FontWeight.bold)),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text("Help",
                               style: TextStyle(
                                   color: AppColors.primaryColor,
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: AppColors.primaryColor,
                                   fontSize: headerFontSize,
                                   fontWeight: FontWeight.bold)),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text("Helpful",
                               style: TextStyle(
                                   color: AppColors.white,

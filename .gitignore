@@ -32,6 +32,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Web related
+lib/generated_plugin_registrant.dart
+
 # Symbolication related
 app.*.symbols
 
@@ -42,3 +45,57 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Additional Flutter ignores
+.metadata
+.flutter-plugins-dependencies
+.flutter-plugins
+coverage/
+lib/generated/
+**/generated_plugin_registrant.dart
+
+# iOS/macOS related
+**/Flutter/ephemeral/
+**/Pods/
+ios/Pods/
+ios/Runner.xcworkspace/
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Windows related
+windows/flutter/ephemeral/
+
+# Linux related  
+linux/flutter/ephemeral/
+
+# Android related
+android/.gradle/
+android/captures/
+android/local.properties
+android/gradlew
+android/gradlew.bat
+android/key.properties
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Test related
+test/.test_coverage.dart
+coverage/
+
+# Keystore files (keep private)
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Cache directories
+.dart_tool/
+build/
