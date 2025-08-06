@@ -11,6 +11,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
   BoxShadow boxShadow = BoxShadow(
     color: Colors.black.withOpacity(0.4), // Shadow color
     spreadRadius: 0, // Spread radius
@@ -19,15 +23,96 @@ class _LoginScreenState extends State<LoginScreen> {
     // Offset in the x, y direction
   );
 
+  // Demo login credentials
+  final String _demoEmail = "demo@helpy.com";
+  final String _demoPassword = "demo123";
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-fill with demo credentials
+    _emailController.text = _demoEmail;
+    _passwordController.text = _demoPassword;
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar("Please enter both email and password", isError: true);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (email == _demoEmail && password == _demoPassword) {
+      // Successful login
+      _showSnackBar("Login successful! Welcome to Helpy!", isError: false);
+
+      // Navigate to map screen and remove login from stack
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesConstants.map,
+          (route) => false,
+        );
+      }
+    } else {
+      // Failed login
+      _showSnackBar("Invalid credentials. Use demo@helpy.com / demo123",
+          isError: true);
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSnackBar(String message, {required bool isError}) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: AppColors.white),
+        ),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isMobile = UtilityMethods.isMobile(context);
     double screenWidth = UtilityMethods.getScreenSize(context).width;
-    double headerWidth= isMobile ? screenWidth * 0.4 : 250;
-    double headerHeight= isMobile? 50 : 60;
-    double headerFontSize=    isMobile ? 35 : 50;
-    double textFieldWidth= isMobile ? 180 : 250;
-    Offset headerTextOffset = isMobile ? const Offset(0, 0) : const Offset(0, -5);
+    double headerWidth = isMobile ? screenWidth * 0.4 : 250;
+    double headerHeight = isMobile ? 50 : 60;
+    double headerFontSize = isMobile ? 35 : 50;
+    double textFieldWidth = isMobile ? 180 : 250;
+    Offset headerTextOffset =
+        isMobile ? const Offset(0, 0) : const Offset(0, -5);
 
     return Scaffold(
       // appBar: AppBar(),
@@ -51,14 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   margin: const EdgeInsets.only(top: 50),
                   width: headerWidth,
                   padding: const EdgeInsets.all(0),
-                  height: headerHeight ,
+                  height: headerHeight,
                   decoration: BoxDecoration(
                     color: AppColors.thirdColor,
                     boxShadow: [boxShadow],
                   ),
                   child: Transform.translate(
                     offset: headerTextOffset,
-                    child:  Row(
+                    child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text("Get",
@@ -81,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   transformAlignment: Alignment.topCenter,
                   alignment: Alignment.topCenter,
                   margin: const EdgeInsets.only(top: 20),
-                  width: headerWidth+70,
+                  width: headerWidth + 70,
                   height: headerHeight,
                   decoration: BoxDecoration(
                     color: AppColors.thirdColor,
@@ -89,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Transform.translate(
                     offset: headerTextOffset,
-                    child:  Row(
+                    child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -118,16 +203,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     boxShadow: [boxShadow],
                   ),
-                  child: const TextField(
+                  child: TextField(
+                    controller: _emailController,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.thirdColor, fontSize: 18),
+                    style: const TextStyle(
+                        color: AppColors.thirdColor, fontSize: 18),
                     maxLines: 1,
-
-                    // expands: true,
-                    decoration: InputDecoration(
-                        //add shadow
+                    keyboardType: TextInputType.emailAddress,
+                    enabled: !_isLoading,
+                    decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(8),
-                        // labelText: 'Email',
                         hintText: "Email",
                         hintStyle: TextStyle(color: AppColors.secondaryColor)),
                   ),
@@ -141,13 +226,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     boxShadow: [boxShadow],
                   ),
-                  child: const TextField(
-                    //center the text
+                  child: TextField(
+                    controller: _passwordController,
                     textAlign: TextAlign.center,
                     obscureText: true,
-                    style: TextStyle(color: AppColors.thirdColor, fontSize: 18),
-                    decoration: InputDecoration(
-                      // labelText: 'Email',
+                    style: const TextStyle(
+                        color: AppColors.thirdColor, fontSize: 18),
+                    enabled: !_isLoading,
+                    decoration: const InputDecoration(
                       contentPadding: EdgeInsets.all(8),
                       hintText: "Password",
                       hintStyle: TextStyle(color: AppColors.secondaryColor),
@@ -164,15 +250,64 @@ class _LoginScreenState extends State<LoginScreen> {
                       boxShadow: [boxShadow],
                     ),
                     child: TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "LOG IN",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Dubai',
-                              fontSize: 18),
-                        )),
+                        onPressed: _isLoading ? null : _handleLogin,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                "LOG IN",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Dubai',
+                                    fontSize: 18),
+                              )),
                   )),
+              const SizedBox(height: 20),
+              // Demo credentials info
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.white.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [boxShadow],
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Demo Login Credentials:",
+                      style: TextStyle(
+                        color: AppColors.thirdColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Email: $_demoEmail",
+                      style: const TextStyle(
+                        color: AppColors.thirdColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      "Password: $_demoPassword",
+                      style: const TextStyle(
+                        color: AppColors.thirdColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 child: Row(
@@ -186,7 +321,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.w300),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(
+                            context, RoutesConstants.phoneVerification);
+                      },
                       child: const Text(
                         " Sign up",
                         style: TextStyle(

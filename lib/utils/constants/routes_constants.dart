@@ -4,4 +4,6 @@ class RoutesConstants {
   static const String map = '/map';
   static const String home = '/home';
   static const String profile = '/profile';
+  static const String phoneVerification = '/phone-verification';
+  static const String signupDetails = '/signup-details';
 }

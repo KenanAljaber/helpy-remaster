@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:helpy/models/user/user.dart';
 import 'package:helpy/styles/theme.dart';
+import 'package:helpy/utils/constants/routes_constants.dart';
 
 class UserProfile extends StatefulWidget {
   final User user;
@@ -54,16 +55,68 @@ class _UserProfileState extends State<UserProfile> {
                       const Spacer(),
                       // Settings and notifications (only for current user)
                       if (widget.isCurrentUser) ...[
-                        Icon(
-                          Icons.settings,
-                          color: Colors.grey[600],
-                          size: 24,
-                        ),
-                        const SizedBox(width: 15),
-                        Icon(
-                          Icons.notifications_outlined,
-                          color: Colors.grey[600],
-                          size: 24,
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: Colors.grey[600],
+                            size: 24,
+                          ),
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem<String>(
+                              value: 'settings',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.settings,
+                                    color: Colors.grey[600],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Settings'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'notifications',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.notifications_outlined,
+                                    color: Colors.grey[600],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text('Notifications'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem<String>(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.logout,
+                                    color: AppColors.secondaryColor,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'Logout',
+                                    style: TextStyle(
+                                      color: AppColors.secondaryColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: _handleMenuAction,
                         ),
                       ],
                     ],
@@ -364,5 +417,108 @@ class _UserProfileState extends State<UserProfile> {
     
     // Optionally navigate back
     Navigator.pop(context);
+  }
+
+  void _handleMenuAction(String action) {
+    switch (action) {
+      case 'settings':
+        // TODO: Navigate to settings screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Settings feature coming soon!'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+        break;
+      case 'notifications':
+        // TODO: Navigate to notifications screen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Notifications feature coming soon!'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+        break;
+      case 'logout':
+        _showLogoutConfirmation();
+        break;
+    }
+  }
+
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Logout',
+            style: TextStyle(
+              color: AppColors.almostBlack,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to logout?',
+            style: TextStyle(
+              color: AppColors.almostBlack,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                _performLogout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Logout',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _performLogout() {
+    // TODO: Clear user session, preferences, etc.
+    
+    // Show logout message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Logged out successfully'),
+        backgroundColor: AppColors.primaryColor,
+      ),
+    );
+    
+    // Navigate to login screen and clear all previous routes
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      RoutesConstants.login,
+      (route) => false,
+    );
   }
 }

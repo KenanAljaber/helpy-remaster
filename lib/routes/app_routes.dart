@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:helpy/models/user/user.dart';
 import 'package:helpy/screens/login_screen/login_screen.dart';
 import 'package:helpy/screens/map_screen/map_screen.dart';
+import 'package:helpy/screens/signup/phone_verification_screen.dart';
+import 'package:helpy/screens/signup/user_details_screen.dart';
 import 'package:helpy/screens/user_profile/user_profile.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
 
@@ -23,6 +25,15 @@ class AppRoutes {
             user: args['user'] as User,
             isCurrentUser: args['isCurrentUser'] as bool? ?? false,
           ),
+        );
+      case RoutesConstants.phoneVerification:
+        return MaterialPageRoute(
+          builder: (context) => const PhoneVerificationScreen(),
+        );
+      case RoutesConstants.signupDetails:
+        final phoneNumber = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (context) => UserDetailsScreen(phoneNumber: phoneNumber),
         );
       default:
         return MaterialPageRoute(builder: (context) => const LoginScreen());

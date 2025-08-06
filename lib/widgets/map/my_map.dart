@@ -87,7 +87,7 @@ class _MyMapState extends State<MyMap> with AutomaticKeepAliveClientMixin {
               panBuffer: 1,  // Reduce pan buffer
               urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
               subdomains: const ['a', 'b', 'c'],
-              backgroundColor: Colors.grey[200], // Add background color while loading
+              // backgroundColor: Colors.grey[200], // Add background color while loading
             ),
             MarkerLayer(markers: [
               // First user marker
