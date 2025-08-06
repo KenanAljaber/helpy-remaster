@@ -12,42 +12,58 @@ class MyMap extends StatefulWidget {
   State<MyMap> createState() => _MyMapState();
 }
 
-class _MyMapState extends State<MyMap> {
+class _MyMapState extends State<MyMap> with AutomaticKeepAliveClientMixin {
   User? selectedUser;
   bool showPopup = false;
   LatLng? selectedPinPosition;
-  final MapController _mapController = MapController();
+  MapController? _mapController;
 
   // Sample user data - in a real app, this would come from your backend
-  final List<User> users = [
+  static final List<User> users = [
     User(
       name: 'John Doe',
       email: 'john@example.com',
       helpWay: 'Help translating papers from English to Spanish',
-      reputation: Reputation.empty(),
+      reputation: Reputation(positive: 45, negative: 3, total: 48),
       photoLink: 'https://via.placeholder.com/60x60/FF6E4E/FFFFFF?text=JD',
+      timesHelped: 25,
+      timesGotHelped: 12,
     ),
     User(
       name: 'Sarah Smith',
       email: 'sarah@example.com',
       helpWay: 'Assist with grocery shopping and errands',
-      reputation: Reputation.empty(),
+      reputation: Reputation(positive: 32, negative: 1, total: 33),
       photoLink: 'https://via.placeholder.com/60x60/87643E/FFFFFF?text=SS',
+      timesHelped: 18,
+      timesGotHelped: 8,
     ),
   ];
 
   // Pin positions
-  final List<LatLng> pinPositions = [
-    const LatLng(37.7749, -122.4194), // San Francisco
-    const LatLng(37.7849, -122.4094), // Oakland
+  static const List<LatLng> pinPositions = [
+    LatLng(37.7749, -122.4194), // San Francisco
+    LatLng(37.7849, -122.4094), // Oakland
   ];
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize map controller lazily
+    _mapController = MapController();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     return Stack(
       children: [
         FlutterMap(
-          mapController: _mapController,
+          mapController: _mapController!,
           options: MapOptions(
             initialCenter: const LatLng(37.7749, -122.4194), // Initial map center coordinates
             initialZoom: 10.0, // Initial zoom level
@@ -64,10 +80,14 @@ class _MyMapState extends State<MyMap> {
           ),
           children: [
             TileLayer(
-              userAgentPackageName: 'com.example.app',
-              maxZoom: 19,
-              urlTemplate:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              userAgentPackageName: 'com.example.helpy',
+              maxZoom: 18, // Reduced max zoom for better performance
+              minZoom: 3,  // Set minimum zoom
+              keepBuffer: 2, // Reduce tile buffer for memory efficiency
+              panBuffer: 1,  // Reduce pan buffer
+              urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
               subdomains: const ['a', 'b', 'c'],
+              backgroundColor: Colors.grey[200], // Add background color while loading
             ),
             MarkerLayer(markers: [
               // First user marker
@@ -124,7 +144,7 @@ class _MyMapState extends State<MyMap> {
   }
 
   Offset _calculatePopupPosition(BuildContext context) {
-    if (selectedPinPosition == null) {
+    if (selectedPinPosition == null || _mapController == null) {
       return const Offset(0, 0);
     }
     
@@ -132,8 +152,8 @@ class _MyMapState extends State<MyMap> {
     final screenSize = MediaQuery.of(context).size;
     
     // Get the current map bounds and zoom
-    final bounds = _mapController.camera.visibleBounds;
-    final zoom = _mapController.camera.zoom;
+    final bounds = _mapController!.camera.visibleBounds;
+    final zoom = _mapController!.camera.zoom;
     
     // Calculate the pixel position of the pin on screen
     final pinScreenPosition = _latLngToScreenPoint(

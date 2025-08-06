@@ -3,48 +3,366 @@ import 'package:helpy/models/user/user.dart';
 import 'package:helpy/styles/theme.dart';
 
 class UserProfile extends StatefulWidget {
-  User user;
-   UserProfile({super.key, required this.user});
+  final User user;
+  final bool isCurrentUser;
+  const UserProfile({super.key, required this.user, this.isCurrentUser = false});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
 }
 
 class _UserProfileState extends State<UserProfile> {
+  final TextEditingController _requestController = TextEditingController();
+
+  @override
+  void dispose() {
+    _requestController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Flexible(
-            child: Container(
-              color: AppColors.primaryColor,
-              height: 150,
-              padding: const EdgeInsets.all( 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+      backgroundColor: Colors.grey[200],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header section with profile info
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.secondaryColor,
+                  // Header with back button and optional settings/notifications
+                  Row(
+                    children: [
+                      // Back button (always shown)
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.almostBlack,
+                          size: 24,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Settings and notifications (only for current user)
+                      if (widget.isCurrentUser) ...[
+                        Icon(
+                          Icons.settings,
+                          color: Colors.grey[600],
+                          size: 24,
+                        ),
+                        const SizedBox(width: 15),
+                        Icon(
+                          Icons.notifications_outlined,
+                          color: Colors.grey[600],
+                          size: 24,
+                        ),
+                      ],
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(widget.user.name.toUpperCase() ?? 'John Doe', textAlign: TextAlign.start,style: const TextStyle( color: Colors.black,fontWeight: FontWeight.bold),),
-                        Text(widget.user.helpWay ?? 'I can help with this tas asda dasd', overflow: TextOverflow.ellipsis, maxLines: 2),
-                        Text(widget.user.phone ?? '1234567890'),
-                      ]
-                    )
-                ]
-              )
+                  const SizedBox(height: 20),
+                  
+                  // Profile picture
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.primaryColor,
+                    backgroundImage: widget.user.photoLink.isNotEmpty 
+                        ? NetworkImage(widget.user.photoLink)
+                        : null,
+                    child: widget.user.photoLink.isEmpty
+                        ? Text(
+                            widget.user.name.substring(0, 2).toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: 15),
+                  
+                  // User name
+                  Text(
+                    widget.user.name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Help way description
+                  Text(
+                    widget.user.helpWay,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 25),
+                  
+                  // Stats row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard(
+                        "${widget.user.timesHelped}",
+                        "Helped",
+                      ),
+                      _buildStatCard(
+                        "${widget.user.timesGotHelped}",
+                        "Got Helped",
+                      ),
+                      _buildStatCard(
+                        "${widget.user.reputation.positive}",
+                        "Reputation",
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          )
-        ]
-      )
+            
+            const SizedBox(height: 20),
+            
+            // Conditional content based on user type
+            if (widget.isCurrentUser) ...[
+              // Around me section for current user
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Around me",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Placeholder notification items
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: 3,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 20,
+                                    backgroundColor: AppColors.primaryColor,
+                                    child: Text(
+                                      "${index + 1}",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Notification ${index + 1}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "This is a placeholder notification for around me section",
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              // Request section for other users
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Request Message",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // Message text field
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _requestController,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          hintText: "Type your request here...",
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // Send request button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _sendRequest();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Send Request",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+            
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
+  }
+  
+  Widget _buildStatCard(String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendRequest() {
+    if (_requestController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a request message'),
+          backgroundColor: AppColors.secondaryColor,
+        ),
+      );
+      return;
+    }
+
+    // TODO: Implement actual request sending logic here
+    // For now, just show a success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Request sent to ${widget.user.name}!'),
+        backgroundColor: AppColors.primaryColor,
+      ),
+    );
+
+    // Clear the text field
+    _requestController.clear();
+    
+    // Optionally navigate back
+    Navigator.pop(context);
   }
 }

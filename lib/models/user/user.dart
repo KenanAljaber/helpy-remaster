@@ -8,6 +8,8 @@ class User {
   final String helpWay;
   final String photoLink;
   final Reputation reputation;
+  final int timesHelped;
+  final int timesGotHelped;
 
   User(
       {this.id = '',
@@ -16,14 +18,18 @@ class User {
       this.phone = "",
       this.photoLink = "",
       required this.helpWay,
-      required this.reputation});
+      required this.reputation,
+      this.timesHelped = 0,
+      this.timesGotHelped = 0});
   User.empty()
       : this(
             id: '',
             name: '',
             email: '',
             helpWay: "",
-            reputation: Reputation.empty());
+            reputation: Reputation.empty(),
+            timesHelped: 0,
+            timesGotHelped: 0);
 
   fromJson(Map<String, dynamic> json) {
     return User(
@@ -35,7 +41,9 @@ class User {
         photoLink: json['photoLink'],
         reputation: json['reputation'] == null
             ? Reputation.empty()
-            : Reputation.fromJson(json['reputation']));
+            : Reputation.fromJson(json['reputation']),
+        timesHelped: json['timesHelped'] ?? 0,
+        timesGotHelped: json['timesGotHelped'] ?? 0);
   }
 
   toJson() {
@@ -46,6 +54,8 @@ class User {
       'phone': phone,
       'helpWay': helpWay,
       'photoLink': photoLink,
+      'timesHelped': timesHelped,
+      'timesGotHelped': timesGotHelped,
       "positiveRate":reputation.positive,
       "negativeRate":reputation.negative
     };

@@ -17,8 +17,12 @@ class AppRoutes {
           builder: (context) => const MapScreen(),
         );
       case RoutesConstants.profile:
+        final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
-          builder: (context) => UserProfile(user: settings.arguments as User),
+          builder: (context) => UserProfile(
+            user: args['user'] as User,
+            isCurrentUser: args['isCurrentUser'] as bool? ?? false,
+          ),
         );
       default:
         return MaterialPageRoute(builder: (context) => const LoginScreen());

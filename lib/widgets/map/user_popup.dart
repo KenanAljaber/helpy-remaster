@@ -114,11 +114,14 @@ class UserPopup extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to user profile
+                      // Navigate to user profile (other user, not current user)
                       Navigator.pushNamed(
                         context,
                         RoutesConstants.profile,
-                        arguments: user,
+                        arguments: {
+                          'user': user,
+                          'isCurrentUser': false, // This is another user's profile
+                        },
                       );
                     },
                     style: ElevatedButton.styleFrom(
