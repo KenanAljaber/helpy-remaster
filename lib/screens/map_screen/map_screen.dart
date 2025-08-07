@@ -1,12 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:helpy/api/services/notification_service.dart';
 import 'package:helpy/models/user/reputation.dart';
 import 'package:helpy/models/user/user.dart';
 import 'package:helpy/styles/theme.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
 import 'package:helpy/utils/utility_methods.dart';
 import 'package:helpy/widgets/map/my_map.dart';
+import 'package:helpy/widgets/notification_badge.dart';
 import 'package:helpy/screens/location_permission_denied_screen.dart';
 import 'package:helpy/screens/user_profile/user_profile.dart';
 
@@ -22,6 +24,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   bool _isLoading = true;
   bool _showPermissionScreen = false;
   int _currentIndex = 1; // Map is in the center (index 1) and active by default
+  int _unreadNotificationsCount = 0;
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
@@ -31,6 +35,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     UtilityMethods.hideStatusBar();
     // Check location availability
     _checkLocationAvailability();
+    // Load notification count
+    _loadNotificationCount();
   }
 
   @override
@@ -90,6 +96,25 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       _isLoading = true;
     });
     _checkLocationAvailability();
+  }
+
+  Future<void> _loadNotificationCount() async {
+    try {
+      // TODO: Replace with actual user ID from authentication
+      const String currentUserId = 'current_user';
+      final count =
+          await _notificationService.getUnreadNotificationsCount(currentUserId);
+      if (mounted) {
+        setState(() {
+          _unreadNotificationsCount = count;
+        });
+      }
+    } catch (e) {
+      // Handle error silently for now
+      if (kDebugMode) {
+        print('Error loading notification count: $e');
+      }
+    }
   }
 
   void _onBottomNavTap(int index) {
@@ -237,28 +262,34 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                     ),
                     // Notification icon
                     const SizedBox(width: 12),
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
+                    NotificationBadge(
+                      count: _unreadNotificationsCount,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          onPressed: () async {
+                            await Navigator.pushNamed(
+                                context, RoutesConstants.notifications);
+                            // Refresh notification count when returning
+                            _loadNotificationCount();
+                          },
+                          icon: const Icon(
+                            Icons.notifications_outlined,
+                            color: AppColors.primaryColor,
+                            size: 24,
                           ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          // TODO: Navigate to notifications screen
-                        },
-                        icon: const Icon(
-                          Icons.notifications_outlined,
-                          color: AppColors.primaryColor,
-                          size: 24,
                         ),
                       ),
                     ),

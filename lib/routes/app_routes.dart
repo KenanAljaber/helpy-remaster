@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:helpy/models/user/user.dart';
 import 'package:helpy/screens/login_screen/login_screen.dart';
 import 'package:helpy/screens/map_screen/map_screen.dart';
+import 'package:helpy/screens/notifications/notifications_screen.dart';
 import 'package:helpy/screens/signup/phone_verification_screen.dart';
 import 'package:helpy/screens/signup/user_details_screen.dart';
 import 'package:helpy/screens/user_profile/user_profile.dart';
@@ -34,6 +35,10 @@ class AppRoutes {
         final phoneNumber = settings.arguments as String;
         return MaterialPageRoute(
           builder: (context) => UserDetailsScreen(phoneNumber: phoneNumber),
+        );
+      case RoutesConstants.notifications:
+        return MaterialPageRoute(
+          builder: (context) => const NotificationsScreen(),
         );
       default:
         return MaterialPageRoute(builder: (context) => const LoginScreen());
