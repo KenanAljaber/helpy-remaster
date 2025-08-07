@@ -20,8 +20,4 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.defaultTheme,
     );
   }
-
-
 }
-
-
