@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:helpy/styles/theme.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
+import 'package:helpy/utils/config.dart';
 import 'package:helpy/widgets/profile_picture_selector.dart';
+import 'package:helpy/widgets/location_picker.dart';
 
 class UserDetailsScreen extends StatefulWidget {
   final String phoneNumber;
@@ -21,6 +23,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   String? _selectedHelpWay;
   bool _isLoading = false;
   String? _profileImagePath;
+  double? _selectedLatitude;
+  double? _selectedLongitude;
 
   final List<String> _helpOptions = [
     'Tutoring and Academic Support',
@@ -57,8 +61,10 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         _emailController.text.trim().isEmpty ||
         _selectedHelpWay == null ||
         (_selectedHelpWay == 'Other (Specify below)' &&
-            _customHelpController.text.trim().isEmpty)) {
-      _showMessage('Please fill in all required fields');
+            _customHelpController.text.trim().isEmpty) ||
+        _selectedLatitude == null ||
+        _selectedLongitude == null) {
+      _showMessage('Please fill in all required fields and set your location');
       return;
     }
 
@@ -72,6 +78,29 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     setState(() {
       _isLoading = false;
     });
+
+    // Here you would typically send the data to your backend
+    // including the location coordinates: _selectedLatitude, _selectedLongitude
+    print('User location: $_selectedLatitude, $_selectedLongitude');
+    print('API Base URL: ${Config.apiBaseUrl}');
+    print('Environment: ${Config.environment}');
+
+    // Example of how to use the Config class for API calls:
+    // final response = await http.post(
+    //   Uri.parse(Config.usersEndpoint),
+    //   body: jsonEncode({
+    //     'firstName': _firstNameController.text.trim(),
+    //     'lastName': _lastNameController.text.trim(),
+    //     'email': _emailController.text.trim(),
+    //     'phoneNumber': widget.phoneNumber,
+    //     'helpWay': _selectedHelpWay,
+    //     'customHelp': _customHelpController.text.trim(),
+    //     'latitude': _selectedLatitude,
+    //     'longitude': _selectedLongitude,
+    //     'profileImage': _profileImagePath,
+    //   }),
+    //   headers: {'Content-Type': 'application/json'},
+    // );
 
     _showMessage('Account created successfully!');
 
@@ -235,6 +264,61 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                 maxLines: 3,
               ),
             ],
+
+            const SizedBox(height: 20),
+
+            // Location picker section
+            const Text(
+              'Set your location',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.almostBlack,
+              ),
+            ),
+            const SizedBox(height: 12),
+            LocationPicker(
+              height: 200,
+              onLocationSelected: (latitude, longitude) {
+                setState(() {
+                  _selectedLatitude = latitude;
+                  _selectedLongitude = longitude;
+                });
+              },
+            ),
+            // if (_selectedLatitude != null && _selectedLongitude != null) ...[
+            //   const SizedBox(height: 12),
+            //   Container(
+            //     padding: const EdgeInsets.all(12),
+            //     decoration: BoxDecoration(
+            //       color: AppColors.primaryColor.withValues(alpha: 0.1),
+            //       borderRadius: BorderRadius.circular(8),
+            //       border: Border.all(
+            //         color: AppColors.primaryColor.withValues(alpha: 0.3),
+            //       ),
+            //     ),
+            //     child: Row(
+            //       children: [
+            //         Icon(
+            //           Icons.location_on,
+            //           color: AppColors.primaryColor,
+            //           size: 16,
+            //         ),
+            //         const SizedBox(width: 8),
+            //         Expanded(
+            //           child: Text(
+            //             'Location set: ${_selectedLatitude!.toStringAsFixed(6)}, ${_selectedLongitude!.toStringAsFixed(6)}',
+            //             style: TextStyle(
+            //               fontSize: 12,
+            //               color: AppColors.primaryColor,
+            //               fontWeight: FontWeight.w500,
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
 
             const SizedBox(height: 40),
 

@@ -288,7 +288,9 @@ class _ProfilePictureSelectorState extends State<ProfilePictureSelector> {
       backgroundColor: AppColors.primaryColor,
       child: widget.fallbackText != null && widget.fallbackText!.isNotEmpty
           ? Text(
-              widget.fallbackText!.substring(0, 2).toUpperCase(),
+              widget.fallbackText!.length >= 2
+                  ? widget.fallbackText!.substring(0, 2).toUpperCase()
+                  : widget.fallbackText!.toUpperCase(),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: widget.size * 0.3,

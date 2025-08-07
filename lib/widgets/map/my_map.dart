@@ -225,7 +225,7 @@ class _MyMapState extends State<MyMap> with AutomaticKeepAliveClientMixin {
                                   return Container(
                                     width: 36,
                                     height: 36,
-                                    color: AppColors.primaryColor,
+                                    color: AppColors.secondaryColor,
                                     child: Icon(
                                       Icons.person,
                                       color: Colors.white,
@@ -268,25 +268,48 @@ class _MyMapState extends State<MyMap> with AutomaticKeepAliveClientMixin {
         ),
         // Popup overlay positioned above the pin
         if (showPopup && selectedUser != null && selectedPinPosition != null)
-          Positioned(
-            left: _calculatePopupPosition(context).dx,
-            top: _calculatePopupPosition(context).dy,
-            child: UserPopup(
-              user: selectedUser!,
-              userLocation: _userLocation,
-              onClose: () {
-                setState(() {
-                  showPopup = false;
-                  selectedUser = null;
-                  selectedPinPosition = null;
-                });
-              },
+          Positioned.fill(
+            child: Stack(
+              children: [
+                // Semi-transparent overlay to handle tap outside
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        showPopup = false;
+                        selectedUser = null;
+                        selectedPinPosition = null;
+                      });
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+                // Popup positioned in the center of the screen
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    child: UserPopup(
+                      user: selectedUser!,
+                      userLocation: _userLocation,
+                      onClose: () {
+                        setState(() {
+                          showPopup = false;
+                          selectedUser = null;
+                          selectedPinPosition = null;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         // My Location button
         if (_userLocation != null)
           Positioned(
-            bottom: 20,
+            bottom: 20, // Position above bottom navigation bar
             right: 20,
             child: FloatingActionButton(
               onPressed: () {
@@ -299,55 +322,5 @@ class _MyMapState extends State<MyMap> with AutomaticKeepAliveClientMixin {
           ),
       ],
     );
-  }
-
-  Offset _calculatePopupPosition(BuildContext context) {
-    if (selectedPinPosition == null || _mapController == null) {
-      return const Offset(0, 0);
-    }
-
-    // Convert lat/lng coordinates to screen pixel coordinates
-    final screenSize = MediaQuery.of(context).size;
-
-    // Get the current map bounds and zoom
-    final bounds = _mapController!.camera.visibleBounds;
-    final zoom = _mapController!.camera.zoom;
-
-    // Calculate the pixel position of the pin on screen
-    final pinScreenPosition = _latLngToScreenPoint(
-      selectedPinPosition!,
-      bounds,
-      screenSize,
-      zoom,
-    );
-
-    // Position popup just above the pin
-    const popupWidth = 280.0;
-    const popupHeight = 150.0; // Approximate popup height
-    const pinOffset = 40.0; // Distance above the pin
-
-    // Center popup horizontally over the pin
-    final popupX = pinScreenPosition.dx - (popupWidth / 2);
-
-    // Position popup above the pin
-    final popupY = pinScreenPosition.dy - popupHeight - pinOffset;
-
-    // Ensure popup stays within screen bounds
-    final adjustedX = popupX.clamp(10.0, screenSize.width - popupWidth - 10);
-    final adjustedY = popupY.clamp(70.0, screenSize.height - popupHeight - 10);
-
-    return Offset(adjustedX, adjustedY);
-  }
-
-  Offset _latLngToScreenPoint(
-      LatLng latLng, LatLngBounds bounds, Size screenSize, double zoom) {
-    // Simple approximation to convert lat/lng to screen coordinates
-    final latRange = bounds.north - bounds.south;
-    final lngRange = bounds.east - bounds.west;
-
-    final x = ((latLng.longitude - bounds.west) / lngRange) * screenSize.width;
-    final y = ((bounds.north - latLng.latitude) / latRange) * screenSize.height;
-
-    return Offset(x, y);
   }
 }

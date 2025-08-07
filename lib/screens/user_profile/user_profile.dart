@@ -60,14 +60,14 @@ class _UserProfileState extends State<UserProfile> {
                         Row(
                           children: [
                             // Back button (always shown)
-                            IconButton(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: AppColors.almostBlack,
-                                size: 24,
-                              ),
-                            ),
+                            // IconButton(
+                            //   onPressed: () => Navigator.pop(context),
+                            //   icon: const Icon(
+                            //     Icons.arrow_back,
+                            //     color: AppColors.almostBlack,
+                            //     size: 24,
+                            //   ),
+                            // ),
                             const Spacer(),
                             // Settings and notifications (only for current user)
                             if (widget.isCurrentUser) ...[
@@ -137,7 +137,7 @@ class _UserProfileState extends State<UserProfile> {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        // const SizedBox(height: 20),
 
                         // Profile picture
                         ProfilePictureSelector(
