@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Helpy - Get Help, Be Helpful',
-      initialRoute: RoutesConstants.login,
+      initialRoute: RoutesConstants.map,
       onGenerateRoute: AppRoutes.getAppRoutes,
       theme: AppTheme.defaultTheme,
     );

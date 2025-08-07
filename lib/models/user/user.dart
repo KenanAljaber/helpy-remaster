@@ -1,4 +1,5 @@
 import 'package:helpy/models/user/reputation.dart';
+import 'package:latlong2/latlong.dart';
 
 class User {
   final String id;
@@ -10,6 +11,7 @@ class User {
   final Reputation reputation;
   final int timesHelped;
   final int timesGotHelped;
+  final LatLng? location;
 
   User(
       {this.id = '',
@@ -20,7 +22,9 @@ class User {
       required this.helpWay,
       required this.reputation,
       this.timesHelped = 0,
-      this.timesGotHelped = 0});
+      this.timesGotHelped = 0,
+      this.location});
+
   User.empty()
       : this(
             id: '',
@@ -29,7 +33,8 @@ class User {
             helpWay: "",
             reputation: Reputation.empty(),
             timesHelped: 0,
-            timesGotHelped: 0);
+            timesGotHelped: 0,
+            location: null);
 
   fromJson(Map<String, dynamic> json) {
     return User(
@@ -43,7 +48,11 @@ class User {
             ? Reputation.empty()
             : Reputation.fromJson(json['reputation']),
         timesHelped: json['timesHelped'] ?? 0,
-        timesGotHelped: json['timesGotHelped'] ?? 0);
+        timesGotHelped: json['timesGotHelped'] ?? 0,
+        location: json['location'] != null
+            ? LatLng(
+                json['location']['latitude'], json['location']['longitude'])
+            : null);
   }
 
   toJson() {
@@ -56,8 +65,11 @@ class User {
       'photoLink': photoLink,
       'timesHelped': timesHelped,
       'timesGotHelped': timesGotHelped,
-      "positiveRate":reputation.positive,
-      "negativeRate":reputation.negative
+      "positiveRate": reputation.positive,
+      "negativeRate": reputation.negative,
+      'location': location != null
+          ? {'latitude': location!.latitude, 'longitude': location!.longitude}
+          : null
     };
   }
 }

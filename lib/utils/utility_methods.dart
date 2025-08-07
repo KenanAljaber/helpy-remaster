@@ -1,20 +1,19 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 class UtilityMethods {
   static Size getScreenSize(BuildContext context) {
     return MediaQuery.of(context).size;
   }
 
-  static bool isMobile (BuildContext context) {
+  static bool isMobile(BuildContext context) {
     try {
-    if(UtilityMethods.getScreenSize(context).width < 600) {
-      return true;
-     }
-     return false;
-    
+      if (UtilityMethods.getScreenSize(context).width < 600) {
+        return true;
+      }
+      return false;
     } catch (e) {
       print("an error occured");
       return false;
@@ -54,6 +53,100 @@ class UtilityMethods {
     } catch (e) {
       print(e);
       return false;
+    }
+  }
+
+  /// Check if location services are enabled and permission is granted
+  static Future<bool> isLocationAvailable() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return false;
+      }
+
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      return permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+    } catch (e) {
+      print('Error checking location availability: $e');
+      return false;
+    }
+  }
+
+  /// Check if location permission is granted but GPS is disabled
+  static Future<bool> isLocationPermissionGrantedButGpsDisabled() async {
+    try {
+      // Check location permission first
+      LocationPermission permission = await Geolocator.checkPermission();
+      bool hasPermission = permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+
+      if (!hasPermission) {
+        return false; // No permission granted
+      }
+
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      return !serviceEnabled; // Return true if permission granted but GPS disabled
+    } catch (e) {
+      print('Error checking location permission and GPS status: $e');
+      return false;
+    }
+  }
+
+  /// Request location permission and return the result
+  static Future<bool> requestLocationPermission() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return false;
+      }
+
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      return permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+    } catch (e) {
+      print('Error requesting location permission: $e');
+      return false;
+    }
+  }
+
+  /// Get current location with timeout
+  static Future<Position?> getCurrentLocation() async {
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          throw Exception('Location request timed out');
+        },
+      );
+    } catch (e) {
+      print('Error getting current location: $e');
+      return null;
+    }
+  }
+
+  /// Open location settings (GPS settings) on Android
+  static Future<void> openLocationSettings() async {
+    try {
+      await Geolocator.openLocationSettings();
+    } catch (e) {
+      print('Error opening location settings: $e');
+      // Fallback to app settings if location settings can't be opened
+      await openAppSettings();
     }
   }
 }
