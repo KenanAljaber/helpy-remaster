@@ -4,6 +4,8 @@ import 'package:helpy/models/country_code.dart';
 import 'package:helpy/styles/theme.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
 import 'package:helpy/utils/utility_methods.dart';
+import 'package:provider/provider.dart';
+import 'package:helpy/state/auth_state.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -97,6 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Successful login
     _showSnackBar("Login successful! Welcome to Helpy!", isError: false);
+
+    // Persist fake token and update global auth state
+    if (!mounted) return;
+    await context.read<AuthState>().signInWithFakeToken();
 
     // Navigate to map screen and remove login from stack
     if (mounted) {

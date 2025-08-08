@@ -7,13 +7,22 @@ import 'package:helpy/screens/signup/phone_verification_screen.dart';
 import 'package:helpy/screens/signup/user_details_screen.dart';
 import 'package:helpy/screens/user_profile/user_profile.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
+import 'package:provider/provider.dart';
+import 'package:helpy/state/auth_state.dart';
 
 class AppRoutes {
   static Route getAppRoutes(RouteSettings settings) {
     switch (settings.name) {
       case RoutesConstants.login:
         return MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
+          builder: (context) {
+            final auth = context.read<AuthState>();
+            if (auth.isLoggedIn) {
+              // Prevent navigating back to login when already signed in
+              return const MapScreen();
+            }
+            return const LoginScreen();
+          },
         );
       case RoutesConstants.map:
         return MaterialPageRoute(

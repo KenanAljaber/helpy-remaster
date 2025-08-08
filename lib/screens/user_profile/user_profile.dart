@@ -3,6 +3,8 @@ import 'package:helpy/models/user/user.dart';
 import 'package:helpy/styles/theme.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
 import 'package:helpy/widgets/profile_picture_selector.dart';
+import 'package:provider/provider.dart';
+import 'package:helpy/state/auth_state.dart';
 
 class UserProfile extends StatefulWidget {
   final User user;
@@ -524,7 +526,8 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _performLogout() {
-    // TODO: Clear user session, preferences, etc.
+    // Clear global auth state and navigate to login
+    context.read<AuthState>().signOut();
 
     // Show logout message
     ScaffoldMessenger.of(context).showSnackBar(

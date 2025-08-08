@@ -20,6 +20,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   List<Request> _receivedRequests = [];
   final NotificationService _notificationService = NotificationService();
   bool _isLoading = true;
+  static const double _maxContentWidth = 900;
 
   @override
   void initState() {
@@ -251,13 +252,19 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       onRefresh: () async {
         _loadNotifications();
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _sentRequests.length,
-        itemBuilder: (context, index) {
-          final request = _sentRequests[index];
-          return _buildSentRequestCard(request);
-        },
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _sentRequests.length,
+            itemBuilder: (context, index) {
+              final request = _sentRequests[index];
+              return _buildSentRequestCard(request);
+            },
+          ),
+        ),
       ),
     );
   }
@@ -281,13 +288,19 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       onRefresh: () async {
         _loadNotifications();
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _receivedRequests.length,
-        itemBuilder: (context, index) {
-          final request = _receivedRequests[index];
-          return _buildReceivedRequestCard(request);
-        },
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _receivedRequests.length,
+            itemBuilder: (context, index) {
+              final request = _receivedRequests[index];
+              return _buildReceivedRequestCard(request);
+            },
+          ),
+        ),
       ),
     );
   }
@@ -305,7 +318,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
             Row(
               children: [
                 ProfilePictureSelector(
-                  initialImagePath: request.helperPhotoLink,
+                  initialImageUrl: request.helperPhotoLink,
                   size: 50,
                   isEditable: false,
                   fallbackText: request.helperName.isNotEmpty
@@ -406,7 +419,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
             Row(
               children: [
                 ProfilePictureSelector(
-                  initialImagePath: request.requesterPhotoLink,
+                  initialImageUrl: request.requesterPhotoLink,
                   size: 50,
                   isEditable: false,
                   fallbackText: request.requesterName.isNotEmpty
@@ -449,44 +462,61 @@ class _NotificationsScreenState extends State<NotificationsScreen>
             ),
             if (request.status == RequestStatus.pending) ...[
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _acceptRequest(request),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Accept',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool isWide = constraints.maxWidth > 600;
+                  final Widget acceptBtn = ElevatedButton(
+                    onPressed: () => _acceptRequest(request),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _showRejectionDialog(request),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red[600],
-                        side: BorderSide(color: Colors.red[600]!),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Reject',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                    child: const Text(
+                      'Accept',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  );
+
+                  final Widget rejectBtn = OutlinedButton(
+                    onPressed: () => _showRejectionDialog(request),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red[600],
+                      side: BorderSide(color: Colors.red[600]!),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),
-                ],
+                    child: const Text(
+                      'Reject',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  );
+
+                  if (isWide) {
+                    return Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(width: 180, child: acceptBtn),
+                        const SizedBox(width: 12),
+                        SizedBox(width: 180, child: rejectBtn),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: acceptBtn),
+                      const SizedBox(width: 12),
+                      Expanded(child: rejectBtn),
+                    ],
+                  );
+                },
               ),
             ],
           ],

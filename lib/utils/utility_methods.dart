@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
@@ -59,14 +60,21 @@ class UtilityMethods {
   /// Check if location services are enabled and permission is granted
   static Future<bool> isLocationAvailable() async {
     try {
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (kIsWeb) {
+        // On web, rely solely on browser permission state
+        final permission = await Geolocator.checkPermission();
+        return permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always;
+      }
+
+      // Check if location services are enabled (mobile/desktop)
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         return false;
       }
 
       // Check location permission
-      LocationPermission permission = await Geolocator.checkPermission();
+      final permission = await Geolocator.checkPermission();
       return permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
     } catch (e) {
@@ -78,6 +86,10 @@ class UtilityMethods {
   /// Check if location permission is granted but GPS is disabled
   static Future<bool> isLocationPermissionGrantedButGpsDisabled() async {
     try {
+      if (kIsWeb) {
+        // GPS toggle concept doesn't apply on web
+        return false;
+      }
       // Check location permission first
       LocationPermission permission = await Geolocator.checkPermission();
       bool hasPermission = permission == LocationPermission.whileInUse ||
@@ -99,14 +111,36 @@ class UtilityMethods {
   /// Request location permission and return the result
   static Future<bool> requestLocationPermission() async {
     try {
-      // Check if location services are enabled
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (kIsWeb) {
+        // On web, trigger the browser permission prompt
+        var permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+
+        // Some browsers only show the prompt when requesting position
+        if (permission == LocationPermission.denied) {
+          try {
+            await Geolocator.getCurrentPosition(
+              locationSettings: const LocationSettings(
+                accuracy: LocationAccuracy.low,
+              ),
+            ).timeout(const Duration(seconds: 10));
+            permission = await Geolocator.checkPermission();
+          } catch (_) {}
+        }
+
+        return permission == LocationPermission.whileInUse ||
+            permission == LocationPermission.always;
+      }
+
+      // Mobile/desktop flow
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         return false;
       }
 
-      // Check location permission
-      LocationPermission permission = await Geolocator.checkPermission();
+      var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }

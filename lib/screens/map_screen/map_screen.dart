@@ -4,13 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:helpy/api/services/notification_service.dart';
 import 'package:helpy/models/user/reputation.dart';
 import 'package:helpy/models/user/user.dart';
+import 'package:helpy/screens/chat/chat_screen.dart';
+import 'package:helpy/screens/location_permission_denied_screen.dart';
+import 'package:helpy/screens/user_profile/user_profile.dart';
 import 'package:helpy/styles/theme.dart';
 import 'package:helpy/utils/constants/routes_constants.dart';
 import 'package:helpy/utils/utility_methods.dart';
 import 'package:helpy/widgets/map/my_map.dart';
 import 'package:helpy/widgets/notification_badge.dart';
-import 'package:helpy/screens/location_permission_denied_screen.dart';
-import 'package:helpy/screens/user_profile/user_profile.dart';
+import 'dart:io' show Platform;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -26,6 +28,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   int _currentIndex = 1; // Map is in the center (index 1) and active by default
   int _unreadNotificationsCount = 0;
   final NotificationService _notificationService = NotificationService();
+  DateTime? _lastBackPressedAt;
 
   @override
   void initState() {
@@ -55,16 +58,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _checkLocationAvailability() async {
-    // Skip on web
-    if (kIsWeb) {
-      setState(() {
-        _locationAvailable = true;
-        _isLoading = false;
-        _showPermissionScreen = false;
-      });
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -125,50 +118,48 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   Widget _buildCurrentScreen() {
     switch (_currentIndex) {
-      case 0: // Chat
+      case 0:
         return _buildChatScreen();
-      case 1: // Map
+      case 1:
         return _buildMapScreen();
-      case 2: // Profile
+      case 2:
         return _buildProfileScreen();
       default:
         return _buildMapScreen();
     }
   }
 
+  Future<bool> _onWillPop() async {
+    // Skip double-back behavior on web
+    if (kIsWeb) {
+      return true;
+    }
+
+    final now = DateTime.now();
+    if (_lastBackPressedAt == null ||
+        now.difference(_lastBackPressedAt!) > const Duration(seconds: 2)) {
+      _lastBackPressedAt = now;
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Press back again to exit to background'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return false;
+    }
+    // Second back press - exit to background on Android
+    if (Platform.isAndroid) {
+      SystemNavigator.pop();
+      return false;
+    }
+    return true;
+  }
+
   Widget _buildChatScreen() {
-    return Container(
-      color: Colors.grey[50],
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 80,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Chat Screen',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming Soon!',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[500],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const ChatScreen();
   }
 
   Widget _buildMapScreen() {
@@ -177,17 +168,17 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       height: double.infinity,
       child: Stack(
         children: [
-          // Show map if location is available or on web
-          if (_locationAvailable || kIsWeb) const MyMap(),
+          // Show map only if location permission is available
+          if (_locationAvailable) const MyMap(),
 
           // Show permission screen if needed
-          if (_showPermissionScreen && !kIsWeb)
+          if (_showPermissionScreen)
             LocationPermissionDeniedScreen(
               onPermissionGranted: _onPermissionGranted,
             ),
 
           // Loading indicator
-          if (_isLoading && !kIsWeb)
+          if (_isLoading)
             Container(
               color: Colors.black26,
               child: const Center(
@@ -199,7 +190,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             ),
 
           // Search bar (only visible on map screen)
-          if (_locationAvailable || kIsWeb)
+          if (_locationAvailable)
             Positioned(
               top: 0,
               left: 0,
@@ -318,55 +309,61 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildCurrentScreen(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Container(
-            height: 60,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Chat Icon
-                _buildBottomNavItem(
-                  icon: Icons.chat_bubble_outline,
-                  activeIcon: Icons.chat_bubble,
-                  label: 'Chat',
-                  index: 0,
-                  isActive: _currentIndex == 0,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: _buildCurrentScreen(),
+        bottomNavigationBar: _showPermissionScreen
+            ? null
+            : Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
                 ),
-                // Map Icon (Center)
-                _buildBottomNavItem(
-                  icon: Icons.map_outlined,
-                  activeIcon: Icons.map,
-                  label: 'Map',
-                  index: 1,
-                  isActive: _currentIndex == 1,
-                  isCenter: true,
+                child: SafeArea(
+                  child: Container(
+                    height: 60,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // Chat Icon
+                        _buildBottomNavItem(
+                          icon: Icons.chat_bubble_outline,
+                          activeIcon: Icons.chat_bubble,
+                          label: 'Chat',
+                          index: 0,
+                          isActive: _currentIndex == 0,
+                        ),
+                        // Map Icon (Center)
+                        _buildBottomNavItem(
+                          icon: Icons.map_outlined,
+                          activeIcon: Icons.map,
+                          label: 'Map',
+                          index: 1,
+                          isActive: _currentIndex == 1,
+                          isCenter: true,
+                        ),
+                        // Profile Icon
+                        _buildBottomNavItem(
+                          icon: Icons.person_outline,
+                          activeIcon: Icons.person,
+                          label: 'Profile',
+                          index: 2,
+                          isActive: _currentIndex == 2,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                // Profile Icon
-                _buildBottomNavItem(
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
-                  label: 'Profile',
-                  index: 2,
-                  isActive: _currentIndex == 2,
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }
